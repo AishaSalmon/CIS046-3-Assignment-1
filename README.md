@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # HOW TO RUN THE APPLICATION
 
 To run the RecipeNest application locally, follow the steps below.
@@ -196,7 +195,3 @@ The backend API should now be running.
 * Ensure both frontend and backend servers are running simultaneously.
 * Ensure frontend and backend URLs are configured correctly.
 * Ensure SQL Server Express services are running before launching the backend.
-=======
-# CIS046-3-Assignment-1
-Assignment 1
->>>>>>> origin/main
