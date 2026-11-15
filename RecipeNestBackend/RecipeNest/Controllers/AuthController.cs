@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using RecipeNest.Interfaces;
@@ -32,7 +31,7 @@ namespace RecipeNest.Controllers
             _config = config;
         }
 
-       
+
         //The register endpoint defined by a POST request. /api/auth/register.
         [HttpPost("register")]
         //This is an asychronous method that takes a RegisterDto object as input, which contains the user's registration details and passes it to the UserManager to create a new user.
@@ -68,6 +67,9 @@ namespace RecipeNest.Controllers
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
                 return Unauthorized("Invalid email or password");
+
+            if (string.IsNullOrWhiteSpace(_config["JWT:SecretKey"]))
+                return Problem("JWT signing is not configured on the server.", statusCode: 500);
 
             var token = GenerateJwtToken(user);
 
@@ -159,7 +161,7 @@ namespace RecipeNest.Controllers
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddDays(7),
+                expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: creds
             );
 

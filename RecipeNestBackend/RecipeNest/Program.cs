@@ -50,13 +50,16 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer("JwtBearer", options =>
     {
+        var jwtSecret = builder.Configuration["JWT:SecretKey"];
         options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
         {
             ValidateIssuer = false,
             ValidateAudience = false,
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("//Replace with desired secret key - consistent with the secret key in appsettigns.json file"))
+            ValidateIssuerSigningKey = !string.IsNullOrWhiteSpace(jwtSecret),
+            IssuerSigningKey = string.IsNullOrWhiteSpace(jwtSecret)
+                ? null
+                : new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
         };
     });
 
@@ -66,7 +69,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReact",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173")  //replace with your frontend URL 
+            policy.WithOrigins(
+                      "http://localhost:5173",
+                      "https://localhost:5173",
+                      "http://127.0.0.1:5173",
+                      "https://127.0.0.1:5173")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -86,9 +93,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 
-app.UseCors("AllowReact");
-
 app.UseRouting();
+app.UseCors("AllowReact");
 
 app.UseAuthentication();
 app.UseAuthorization();
