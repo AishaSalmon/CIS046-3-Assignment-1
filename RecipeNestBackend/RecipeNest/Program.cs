@@ -1,10 +1,11 @@
-using Microsoft.EntityFrameworkCore;
-using RecipeNest.Data;
-using RecipeNest.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using RecipeNest.Data;
 using RecipeNest.Interfaces;
+using RecipeNest.Models;
+using RecipeNest.Services.ExternalRecipes;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -79,7 +80,12 @@ builder.Services.AddCors(options =>
         });
 });
 
-
+builder.Services.AddHttpClient<TheMealDbService>(client =>
+{
+    client.BaseAddress = new Uri(
+        "https://www.themealdb.com/api/json/v1/1/"
+    );
+});
 
 var app = builder.Build();
 
