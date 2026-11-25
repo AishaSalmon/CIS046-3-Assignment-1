@@ -246,6 +246,9 @@ export default function ViewDashboard(){
     typeof chefProfile?.profileImageURL === "string"
         ? getImageUrl(chefProfile.profileImageURL) || DefaultProfile
         : DefaultProfile;
+        console.log("Image Base URL:", import.meta.env.VITE_IMAGE_URL);
+        console.log("Database Image Path:", chefProfile?.profileImageURL);
+        console.log("Generated Image URL:", profileImageSrc);
 
             //The JSX returns the create profile form, edit profile form and delete confirmation dialog as modals, and the main dashboard content which displays the chef's profile information and buttons to edit, delete or manage recipes.
     const createProfile = (
