@@ -28,7 +28,7 @@ export default function DiscussionCard
   onDelete,
   liked,
 }: DiscussionCardProps) {
-  const API_URL = import.meta.env.VITE_API_URL;
+  //const API_URL = import.meta.env.VITE_API_URL;
 
   //the profileImageSrc variable is constructed to determine the correct URL for the discussion's profile image. It checks if the discussion has a profileImageURL and if it's a string. It constructs uses either the absolute or relative URL. If no images exists, it falls back to the default profile image.
   // const profileImageSrc = discussion?.profileImageURL && typeof discussion.profileImageURL === "string"

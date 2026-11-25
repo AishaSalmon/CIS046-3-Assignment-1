@@ -22,7 +22,7 @@ export default function SavedRecipeCard({
   onView,
   onShare,
 }: SavedRecipeCardProps) {
-    const API_URL = import.meta.env.VITE_API_URL;
+    //const API_URL = import.meta.env.VITE_API_URL;
     // const profileImageSrc = recipe?.profileImageURL && typeof recipe.profileImageURL === "string"
     //     ? (recipe.profileImageURL.startsWith("http")
     //         ? recipe.profileImageURL

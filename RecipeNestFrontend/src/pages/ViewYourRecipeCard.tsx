@@ -24,7 +24,7 @@ export default function RecipeCard({
   onDelete,
   onShare,
 }: RecipeCardProps) {
-    const API_URL = import.meta.env.VITE_API_URL;
+    //const API_URL = import.meta.env.VITE_API_URL;
     // The profileImageSrc and recipeImageSrc variables determine the source URLs for the profile and recipe images, respectively.
     // They handle both absolute and relative paths, falling back to default images if necessary.
     // const profileImageSrc = recipe?.profileImageURL && typeof recipe.profileImageURL === "string"

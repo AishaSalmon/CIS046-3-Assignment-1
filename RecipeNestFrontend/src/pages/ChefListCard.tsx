@@ -18,7 +18,7 @@ export default function ChefListCard
   onViewRecipes,
   onViewProfile,
 }: ChefListCardProps) {
-  const API_URL = import.meta.env.VITE_API_URL;
+  //const API_URL = import.meta.env.VITE_API_URL;
 
   // The profile image is used ensure that it displays correctly whether it's a full URL or a relative path from the API or a default image.
   // const profileImageSrc = chef?.profileImageURL && typeof chef.profileImageURL === "string"

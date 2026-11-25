@@ -20,7 +20,7 @@ export default function ViewRecipe({
   error = "",
   success = "",
 }: ViewRecipeProps) {
-    const API_URL = import.meta.env.VITE_API_URL;
+    //const API_URL = import.meta.env.VITE_API_URL;
 
     //the variables profileImageSrc and recipeImageSrc are responsible for determining the correct image URLs for the chef's profile picture and the recipe image, respectively.
     // They handle cases where the URLs may be relative paths or absolute URLs, and they provide default images if no valid URLs are available.
