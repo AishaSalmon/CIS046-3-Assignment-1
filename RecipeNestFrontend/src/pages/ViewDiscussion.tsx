@@ -1,5 +1,6 @@
 import type { Discussion } from "../types/discussion";
 import DefaultProfile from "../assets/default-profile.png";
+import { getImageUrl } from "../utils/imageUtils";
 
 type ViewDiscussionProps = {
   discussion: Discussion;
@@ -18,10 +19,15 @@ export default function ViewDiscussion({
   success = "",
 }: ViewDiscussionProps) {
   const API_URL = import.meta.env.VITE_API_URL;
-  const profileImageSrc = discussion?.profileImageURL && typeof discussion.profileImageURL === "string"
-        ? (discussion.profileImageURL.startsWith("http")
-            ? discussion.profileImageURL
-            : `${new URL(API_URL).origin}${discussion.profileImageURL.startsWith("/") ? "" : "/"}${discussion.profileImageURL}`)
+  // const profileImageSrc = discussion?.profileImageURL && typeof discussion.profileImageURL === "string"
+  //       ? (discussion.profileImageURL.startsWith("http")
+  //           ? discussion.profileImageURL
+  //           : `${new URL(API_URL).origin}${discussion.profileImageURL.startsWith("/") ? "" : "/"}${discussion.profileImageURL}`)
+  //       : DefaultProfile;
+
+  const profileImageSrc =
+    typeof discussion?.profileImageURL === "string"
+        ? getImageUrl(discussion.profileImageURL) || DefaultProfile
         : DefaultProfile;
     
 

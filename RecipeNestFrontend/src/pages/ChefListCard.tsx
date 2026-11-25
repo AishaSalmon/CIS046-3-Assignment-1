@@ -1,5 +1,6 @@
 import DefaultProfile from "../assets/default-profile.png";
 import type { ChefProfile } from "../types/ChefProfile";
+import { getImageUrl } from "../utils/imageUtils";
 import "./Home.css";
 
 //cheflist card component, used to display the chef profile information in the chef list page, and also used in the modal to display the chef profile information when a chef is selected.
@@ -20,11 +21,16 @@ export default function ChefListCard
   const API_URL = import.meta.env.VITE_API_URL;
 
   // The profile image is used ensure that it displays correctly whether it's a full URL or a relative path from the API or a default image.
-  const profileImageSrc = chef?.profileImageURL && typeof chef.profileImageURL === "string"
-    ? (chef.profileImageURL.startsWith("http")
-        ? chef.profileImageURL
-        : `${new URL(API_URL).origin}${chef.profileImageURL.startsWith("/") ? "" : "/"}${chef.profileImageURL}`)
-    : DefaultProfile;
+  // const profileImageSrc = chef?.profileImageURL && typeof chef.profileImageURL === "string"
+  //   ? (chef.profileImageURL.startsWith("http")
+  //       ? chef.profileImageURL
+  //       : `${new URL(API_URL).origin}${chef.profileImageURL.startsWith("/") ? "" : "/"}${chef.profileImageURL}`)
+  //   : DefaultProfile;
+
+  const profileImageSrc =
+    typeof chef?.profileImageURL === "string"
+        ? getImageUrl(chef.profileImageURL) || DefaultProfile
+        : DefaultProfile;
     
   return (
     <div className="card">

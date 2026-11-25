@@ -1,6 +1,7 @@
 import DefaultProfile from "../assets/default-profile.png";
 import DefaultRecipeImage from "../assets/default-recipe-image.png";
 import type { Recipe } from "../types/recipe";
+import { getImageUrl } from "../utils/imageUtils";
 
 type ViewRecipeProps = {
   recipe: Recipe;
@@ -23,16 +24,26 @@ export default function ViewRecipe({
 
     //the variables profileImageSrc and recipeImageSrc are responsible for determining the correct image URLs for the chef's profile picture and the recipe image, respectively.
     // They handle cases where the URLs may be relative paths or absolute URLs, and they provide default images if no valid URLs are available.
-    const profileImageSrc = recipe?.profileImageURL && typeof recipe.profileImageURL === "string"
-        ? (recipe.profileImageURL.startsWith("http")
-            ? recipe.profileImageURL
-            : `${new URL(API_URL).origin}${recipe.profileImageURL.startsWith("/") ? "" : "/"}${recipe.profileImageURL}`)
-        : DefaultProfile;
+    // const profileImageSrc = recipe?.profileImageURL && typeof recipe.profileImageURL === "string"
+    //     ? (recipe.profileImageURL.startsWith("http")
+    //         ? recipe.profileImageURL
+    //         : `${new URL(API_URL).origin}${recipe.profileImageURL.startsWith("/") ? "" : "/"}${recipe.profileImageURL}`)
+    //     : DefaultProfile;
     
-    const recipeImageSrc = recipe?.recipeImageURL && typeof recipe.recipeImageURL === "string"
-        ? (recipe.recipeImageURL.startsWith("http")
-            ? recipe.recipeImageURL
-            : `${new URL(API_URL).origin}${recipe.recipeImageURL.startsWith("/") ? "" : "/"}${recipe.recipeImageURL}`)
+    // const recipeImageSrc = recipe?.recipeImageURL && typeof recipe.recipeImageURL === "string"
+    //     ? (recipe.recipeImageURL.startsWith("http")
+    //         ? recipe.recipeImageURL
+    //         : `${new URL(API_URL).origin}${recipe.recipeImageURL.startsWith("/") ? "" : "/"}${recipe.recipeImageURL}`)
+    //     : DefaultRecipeImage;
+
+    const profileImageSrc =
+    typeof recipe?.profileImageURL === "string"
+        ? getImageUrl(recipe.profileImageURL) || DefaultProfile
+        : DefaultProfile;
+
+    const recipeImageSrc =
+    typeof recipe?.recipeImageURL === "string"
+        ? getImageUrl(recipe.recipeImageURL) || DefaultRecipeImage
         : DefaultRecipeImage;
 
         //the return statement renders the recipe details components, usually displayed in a modal format. It includes a detailed view of the recipe, chef information, recipe title, description, ingredients, and cooking instructions.

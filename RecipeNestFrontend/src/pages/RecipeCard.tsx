@@ -1,6 +1,7 @@
 import DefaultProfile from "../assets/default-profile.png";
 import DefaultRecipeImage from "../assets/default-recipe-image.png";
 import type { Recipe } from "../types/recipe";
+import { getImageUrl } from "../utils/imageUtils";
 import "./Home.css";
 
 //the RecipeCard props define the structure of the data and functions that the RecipeCard component expects to receive. It includes the recipe data itself, as well as callback functions for saving, viewing, and sharing the recipe.
@@ -23,16 +24,26 @@ export default function RecipeCard({
   onShare,
 }: RecipeCardProps) {
     const API_URL = import.meta.env.VITE_API_URL;
-    const profileImageSrc = recipe?.profileImageURL && typeof recipe.profileImageURL === "string"
-        ? (recipe.profileImageURL.startsWith("http")
-            ? recipe.profileImageURL
-            : `${new URL(API_URL).origin}${recipe.profileImageURL.startsWith("/") ? "" : "/"}${recipe.profileImageURL}`)
-        : DefaultProfile;
+    // const profileImageSrc = recipe?.profileImageURL && typeof recipe.profileImageURL === "string"
+    //     ? (recipe.profileImageURL.startsWith("http")
+    //         ? recipe.profileImageURL
+    //         : `${new URL(API_URL).origin}${recipe.profileImageURL.startsWith("/") ? "" : "/"}${recipe.profileImageURL}`)
+    //     : DefaultProfile;
     
-    const recipeImageSrc = recipe?.recipeImageURL && typeof recipe.recipeImageURL === "string"
-        ? (recipe.recipeImageURL.startsWith("http")
-            ? recipe.recipeImageURL
-            : `${new URL(API_URL).origin}${recipe.recipeImageURL.startsWith("/") ? "" : "/"}${recipe.recipeImageURL}`)
+    // const recipeImageSrc = recipe?.recipeImageURL && typeof recipe.recipeImageURL === "string"
+    //     ? (recipe.recipeImageURL.startsWith("http")
+    //         ? recipe.recipeImageURL
+    //         : `${new URL(API_URL).origin}${recipe.recipeImageURL.startsWith("/") ? "" : "/"}${recipe.recipeImageURL}`)
+    //     : DefaultRecipeImage;
+
+    const profileImageSrc =
+    typeof recipe?.profileImageURL === "string"
+        ? getImageUrl(recipe.profileImageURL) || DefaultProfile
+        : DefaultProfile;
+
+    const recipeImageSrc =
+    typeof recipe?.recipeImageURL === "string"
+        ? getImageUrl(recipe.recipeImageURL) || DefaultRecipeImage
         : DefaultRecipeImage;
 
   //the return statement renders the JSX for the RecipeCard component. It includes the chef's profile image, name, professional title, recipe title, description, and action buttons for saving, sharing, and viewing the recipe.

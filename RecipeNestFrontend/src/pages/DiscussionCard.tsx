@@ -1,5 +1,6 @@
 import DefaultProfile from "../assets/default-profile.png";
 import type { Discussion } from "../types/discussion";
+import { getImageUrl } from "../utils/imageUtils";
 import "./Home.css";
 
 
@@ -30,10 +31,15 @@ export default function DiscussionCard
   const API_URL = import.meta.env.VITE_API_URL;
 
   //the profileImageSrc variable is constructed to determine the correct URL for the discussion's profile image. It checks if the discussion has a profileImageURL and if it's a string. It constructs uses either the absolute or relative URL. If no images exists, it falls back to the default profile image.
-  const profileImageSrc = discussion?.profileImageURL && typeof discussion.profileImageURL === "string"
-        ? (discussion.profileImageURL.startsWith("http")
-            ? discussion.profileImageURL
-            : `${new URL(API_URL).origin}${discussion.profileImageURL.startsWith("/") ? "" : "/"}${discussion.profileImageURL}`)
+  // const profileImageSrc = discussion?.profileImageURL && typeof discussion.profileImageURL === "string"
+  //       ? (discussion.profileImageURL.startsWith("http")
+  //           ? discussion.profileImageURL
+  //           : `${new URL(API_URL).origin}${discussion.profileImageURL.startsWith("/") ? "" : "/"}${discussion.profileImageURL}`)
+  //       : DefaultProfile;
+
+  const profileImageSrc =
+    typeof discussion?.profileImageURL === "string"
+        ? getImageUrl(discussion.profileImageURL) || DefaultProfile
         : DefaultProfile;
     
   //returning the JSX for the discussion card, which includes the profile image, name, professional title, discussion title, and description. It also includes buttons for liking/unliking, viewing, and deleting the discussion, which trigger the corresponding callback functions when clicked.

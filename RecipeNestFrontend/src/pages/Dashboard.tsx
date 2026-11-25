@@ -7,6 +7,7 @@ import DefaultProfile from "../assets/default-profile.png";
 import { useNavigate } from "react-router-dom";
 import Modal from "../components/modal/Modal";
 import "./Home.css";
+import { getImageUrl } from "../utils/imageUtils";
 
 
 //the dashboard page is where chefs can manage their profiles and recipes.
@@ -235,12 +236,16 @@ export default function ViewDashboard(){
 
 
     //this defines the profile image source, from absolute to relatve URL, if no profle, a default profile image is used instead.
+    // const profileImageSrc =
+    //     chefProfile?.profileImageURL && typeof chefProfile.profileImageURL === "string"
+    //         ? chefProfile.profileImageURL.startsWith("http")
+    //             ? chefProfile.profileImageURL
+    //             : `${new URL(API_URL).origin}${chefProfile.profileImageURL.startsWith("/") ? "" : "/"}${chefProfile.profileImageURL}`
+    //         : DefaultProfile;
     const profileImageSrc =
-        chefProfile?.profileImageURL && typeof chefProfile.profileImageURL === "string"
-            ? chefProfile.profileImageURL.startsWith("http")
-                ? chefProfile.profileImageURL
-                : `${new URL(API_URL).origin}${chefProfile.profileImageURL.startsWith("/") ? "" : "/"}${chefProfile.profileImageURL}`
-            : DefaultProfile;
+    typeof chefProfile?.profileImageURL === "string"
+        ? getImageUrl(chefProfile.profileImageURL) || DefaultProfile
+        : DefaultProfile;
 
             //The JSX returns the create profile form, edit profile form and delete confirmation dialog as modals, and the main dashboard content which displays the chef's profile information and buttons to edit, delete or manage recipes.
     const createProfile = (
