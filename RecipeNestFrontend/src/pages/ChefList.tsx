@@ -8,6 +8,7 @@ import Modal from "../components/modal/Modal";
 import DefaultProfile from "../assets/default-profile.png";
 import {useNavigate} from "react-router-dom";
 import SearchSortControls from "../components/SearchSortControls";
+import { getImageUrl } from "../utils/imageUtils";
 
 // This component displays a list of chef profiles, allowing users to search, sort, and view details of each chef.
 // It fetches the chef data from an API and manages loading, error, and success states. Users can click on a chef to view their profile in a modal or navigate to a page showing their recipes.
@@ -65,7 +66,8 @@ export default function ChefList() {
    const profileImageSrc = selectedChef?.profileImageURL && typeof selectedChef.profileImageURL === "string"
         ? (selectedChef.profileImageURL.startsWith("http")
             ? selectedChef.profileImageURL
-            : `${new URL(API_URL).origin}${selectedChef.profileImageURL.startsWith("/") ? "" : "/"}${selectedChef.profileImageURL}`)
+            : getImageUrl(selectedChef?.profileImageURL) || DefaultProfile)
+            // : `${new URL(API_URL).origin}${selectedChef.profileImageURL.startsWith("/") ? "" : "/"}${selectedChef.profileImageURL}`)
         : DefaultProfile;
 
   useEffect(() => {
