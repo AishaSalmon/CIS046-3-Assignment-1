@@ -63,11 +63,15 @@ export default function ChefList() {
 
 
   //this determines the correct profile image url for the selected chef, handling absolute and relative URL, and implementing a fallback image, to prevent the Ui from breaking if the profile image is absent.
-   const profileImageSrc = selectedChef?.profileImageURL && typeof selectedChef.profileImageURL === "string"
-        ? (selectedChef.profileImageURL.startsWith("http")
-            ? selectedChef.profileImageURL
-            : getImageUrl(selectedChef?.profileImageURL) || DefaultProfile)
-            // : `${new URL(API_URL).origin}${selectedChef.profileImageURL.startsWith("/") ? "" : "/"}${selectedChef.profileImageURL}`)
+  //  const profileImageSrc = /*selectedChef?.profileImageURL &&*/ typeof selectedChef.profileImageURL === "string"
+  //       // ? (selectedChef.profileImageURL.startsWith("http")
+  //           // ? selectedChef.profileImageURL
+  //           : getImageUrl(selectedChef?.profileImageURL) || DefaultProfile)
+  //           // : `${new URL(API_URL).origin}${selectedChef.profileImageURL.startsWith("/") ? "" : "/"}${selectedChef.profileImageURL}`)
+  //       : DefaultProfile;
+  const profileImageSrc =
+    typeof selectedChef?.profileImageURL === "string"
+        ? getImageUrl(selectedChef.profileImageURL) || DefaultProfile
         : DefaultProfile;
 
   useEffect(() => {
