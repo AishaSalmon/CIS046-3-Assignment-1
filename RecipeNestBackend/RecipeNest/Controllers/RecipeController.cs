@@ -6,8 +6,8 @@ using RecipeNest.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using RecipeNest.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.OutputCaching;
-
+using RecipeNest.Interfaces;
+using RecipeNest.Services;
 
 namespace RecipeNest.Controllers
 {
@@ -22,10 +22,12 @@ namespace RecipeNest.Controllers
     public class RecipeController : ControllerBase //inheriting from controllerbase as an API controller, for handling HTTP requests related to recipes
     {
         private readonly RecipeNestDbContext _context;
+        private readonly IImageStorageService _imageStorageService;
 
-        public RecipeController(UserManager<User> userManager, RecipeNestDbContext context)
+        public RecipeController(UserManager<User> userManager, RecipeNestDbContext context, IImageStorageService imageStorageService)
         {
             _context = context;
+            _imageStorageService = imageStorageService;
         }
 
 
@@ -181,24 +183,9 @@ namespace RecipeNest.Controllers
 
             if(createRecipeDto.RecipeImageURL != null)
             {
-                var folderPath = Path.Combine(Directory.GetCurrentDirectory(),"wwwroot/images");
-
-                //To ensure the wwwroot/images folder exists before saving the image
-                if (!Directory.Exists(folderPath))
-                {
-                    Directory.CreateDirectory(folderPath);
-                }
-
-                //To generate a unique filename for the uploaded image to prevent overwriting existing files
-                var filename = Guid.NewGuid().ToString() + Path.GetExtension(createRecipeDto.RecipeImageURL.FileName);
-
-                var filePath = Path.Combine(folderPath, filename);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await createRecipeDto.RecipeImageURL.CopyToAsync(stream);
-                }
-                imagePath = "/images/" + filename;
+                imagePath = await _imageStorageService.UploadImageAsync(createRecipeDto.RecipeImageURL);
             }
+            System.Diagnostics.Debug.WriteLine($"Image received: {createRecipeDto.RecipeImageURL != null}");
 
             var recipe = new Recipe
             {
@@ -251,11 +238,7 @@ namespace RecipeNest.Controllers
             //Ensuring that if the recipe has an associated image, we delete the image file from the server to prevent orphaned files and save storage space
             if (!string.IsNullOrEmpty(recipe.RecipeImageURL))
             {
-                var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", recipe.RecipeImageURL.TrimStart('/'));
-                if (System.IO.File.Exists(imagePath))
-                {
-                    System.IO.File.Delete(imagePath);
-                }
+                await _imageStorageService.DeleteImageAsync(recipe.RecipeImageURL);
             }
 
             _context.Recipes.Remove(recipe);
@@ -324,34 +307,26 @@ namespace RecipeNest.Controllers
                 }).ToList();
             recipe.UpdatedAt = DateTime.Now;
 
+            string? oldImagePath = null;
+
             if (updateRecipeDto.RecipeImageURL != null)
             {
-                if (!string.IsNullOrEmpty(recipe.RecipeImageURL))
-                {
-                    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", recipe.RecipeImageURL.TrimStart('/'));
-                    if (System.IO.File.Exists(oldPath))
-                        System.IO.File.Delete(oldPath);
-                }
+                // Retain the existing image reference
+                oldImagePath = recipe.RecipeImageURL;
 
-                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-                if (!Directory.Exists(folderPath))
-                {
-                    Directory.CreateDirectory(folderPath);
-                }
-                //var filename = Guid.NewGuid().ToString() + Path.GetExtension(createRecipeDto.RecipeImageURL.FileName);
-                var filename = Guid.NewGuid().ToString() + Path.GetExtension(updateRecipeDto.RecipeImageURL.FileName);
-                var filePath = Path.Combine(folderPath, filename);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await updateRecipeDto.RecipeImageURL.CopyToAsync(stream);
-                }
-                recipe.RecipeImageURL = "/images/" + filename;
+                // Upload the new image to Cloudflare R2
+                recipe.RecipeImageURL = await _imageStorageService
+                    .UploadImageAsync(updateRecipeDto.RecipeImageURL);
             }
 
 
             _context.Recipes.Update(recipe);
 
             await _context.SaveChangesAsync();
+            if (!string.IsNullOrEmpty(oldImagePath))
+            {
+                await _imageStorageService.DeleteImageAsync(oldImagePath);
+            }
             return Ok(new
             {
                 recipe.RecipeId,
