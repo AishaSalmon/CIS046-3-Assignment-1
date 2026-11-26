@@ -6,6 +6,9 @@ using RecipeNest.Interfaces;
 using RecipeNest.Models;
 using RecipeNest.Services.ExternalRecipes;
 using System.Text;
+using Amazon.S3;
+using Amazon.Runtime;
+using RecipeNest.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +27,30 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
+// Configure Cloudflare R2 storage
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+
+    var credentials = new BasicAWSCredentials(
+        configuration["CloudflareR2:AccessKeyId"],
+        configuration["CloudflareR2:SecretAccessKey"]
+    );
+
+    var config = new AmazonS3Config
+    {
+        ServiceURL = configuration["CloudflareR2:ServiceUrl"]
+        ?? throw new InvalidOperationException(
+            "Cloudflare R2 ServiceUrl is missing."),
+        ForcePathStyle = true,
+        AuthenticationRegion = "auto"
+    };
+
+    return new AmazonS3Client(credentials, config);
+});
+
+// Register image storage service
+builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
 
 
 
@@ -76,7 +103,8 @@ builder.Services.AddCors(options =>
                       "http://127.0.0.1:5173",
                       "https://127.0.0.1:5173",
                       "https://recipenest.pages.dev",
-                      "https://ff56a22c.recipenest.pages.dev")
+                      "https://ff56a22c.recipenest.pages.dev",
+                      "https://recipenest.pages.dev")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });

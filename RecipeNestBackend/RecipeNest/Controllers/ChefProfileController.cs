@@ -5,8 +5,7 @@ using System.Security.Claims;
 using RecipeNest.Data;
 using RecipeNest.Models;
 using RecipeNest.Models.DTOs;
-using Microsoft.AspNetCore.Http.HttpResults;
-
+using RecipeNest.Interfaces;
 
 //THis controller manages CRUD operations related to the chef profile, allowing authenticated users to created, read, update and delete their chef profile. Each chef can only have one profile, and they can only manage their own profile.
 [Route("api/[controller]")]
@@ -15,10 +14,11 @@ using Microsoft.AspNetCore.Http.HttpResults;
 public class ChefProfileController : ControllerBase
 {
     private readonly RecipeNestDbContext _context;
-
-    public ChefProfileController(RecipeNestDbContext context)
+    private readonly IImageStorageService _imageStorageService;
+    public ChefProfileController(RecipeNestDbContext context, IImageStorageService imageStorageService)
     {
         _context = context;
+        _imageStorageService = imageStorageService;
     }
 
     //CREATE Chef Profile. The endpoint is an asynchronous POSt method that acceps a CreateChefProfileDto object.
@@ -44,22 +44,7 @@ public class ChefProfileController : ControllerBase
 
         if (dto.ProfileImageURL != null)
         {
-            var folderName = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images"); //creating a folder path to store the uploaded images.
-
-            if (!Directory.Exists(folderName))
-            {
-                Directory.CreateDirectory(folderName);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.ProfileImageURL.FileName);
-
-            var fullPath = Path.Combine(folderName, fileName);
-
-            using (var stream = new FileStream(fullPath, FileMode.Create))
-            {
-                await dto.ProfileImageURL.CopyToAsync(stream);
-            }
-            imagePath = "/image/" + fileName; // final image path to be stored as the URL in the database, which can be used to access the image later.
+            imagePath = await _imageStorageService.UploadImageAsync(dto.ProfileImageURL);
         }
 
 
@@ -193,33 +178,26 @@ public class ChefProfileController : ControllerBase
         profile.IsProfileVisible = dto.IsProfileVisible;
         profile.UpdatedAt = DateTime.Now;
 
+        string? oldImagePath = null;
+
         if (dto.ProfileImageURL != null)
         {
             if (!string.IsNullOrEmpty(profile.ProfileImageURL))
             {
-                var filePath1 = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfileImageURL.TrimStart('/'));
-                if (System.IO.File.Exists(filePath1))
-                {
-                    System.IO.File.Delete(filePath1);
-                }
-            }
+                oldImagePath = profile.ProfileImageURL;
 
-            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-            var filename = Guid.NewGuid().ToString() + Path.GetExtension(dto.ProfileImageURL.FileName);
-            var filePath = Path.Combine(folderPath, filename);
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await dto.ProfileImageURL.CopyToAsync(stream);
-            }
-            profile.ProfileImageURL = "/images/" + filename;
+                profile.ProfileImageURL = await _imageStorageService.UploadImageAsync(dto.ProfileImageURL);
+            }   
         }
 
 
         await _context.SaveChangesAsync();
+
+        // Delete the old profile picture from Cloudflare R2
+        if (!string.IsNullOrEmpty(oldImagePath))
+        {
+            await _imageStorageService.DeleteImageAsync(oldImagePath);
+        }
 
         return Ok(new
         { 
@@ -249,11 +227,7 @@ public class ChefProfileController : ControllerBase
 
         if (!string.IsNullOrEmpty(profile.ProfileImageURL))
         {
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfileImageURL.TrimStart('/'));
-            if (System.IO.File.Exists(filePath))
-            {
-                System.IO.File.Delete(filePath);
-            }
+            await _imageStorageService.DeleteImageAsync(profile.ProfileImageURL);
         }
 
         _context.ChefProfiles.Remove(profile);
